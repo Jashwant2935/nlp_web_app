@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Sentiment Analysis</title>
+</head>
+<body>
+<h1>NLP WEB APP</h1>
+<h2>Sentiment Analysis</h2>
+<h3>{{message}}</h3>
+<form action="/perform_sentiment" method="POST">
+
+    <label>Perform Sentiment Analysis Text</label><br>
+
+    <textarea name="text" rows="10" cols="50"></textarea><br><br>
+
+    <input type="submit" value="Analyze Sentiment">
+</form>
+<hr>
+
+{% if sentiment %}
+
+    <h2>Result</h2>
+
+    <p>
+        Sentiment :
+        <b>{{ sentiment }}</b>
+    </p>
+
+    <p>
+        Confidence Score :
+        <b>{{ score }}</b>
+    </p>
+
+{% endif %}
+</body>
+</html>

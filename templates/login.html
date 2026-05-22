@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title> Login </title>
+    <style>
+        body{background-color:lightblue }</style>
+</head>
+<body>
+<h1>NLP WEB APP</h1>
+<h3>login </h3>
+<h3 style="color:Green">{{ message }}</h3>
+
+<form action="/perform_login" method="POST">
+    <label>Email</label><br>
+    <input type="email"  name="email"><br>
+    <label>Password</label><br>
+    <input type="password" name="password"><br><br>
+
+    <input type="submit" value="Login">
+
+
+
+</form>
+
+<p> Not a member? <a href="/register">Register Here</a></p>
+</body>
+</html>

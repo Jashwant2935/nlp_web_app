@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>NER</title>
+</head>
+
+<body>
+
+<h1>NER</h1>
+
+<h3>{{ message }}</h3>
+
+<form action="/perform_ner" method="POST">
+
+    <label>Perform NER Text</label><br>
+
+    <textarea name="text" rows="8" cols="50"></textarea><br><br>
+
+    <input type="submit" value="Perform NER">
+
+</form>
+
+<hr>
+
+{% if entities %}
+
+    <h2>Entities:</h2>
+
+    {% for entity in entities %}
+
+        <p>
+            <b>{{ entity.text }}</b>
+            →
+            {{ entity.label }}
+        </p>
+
+    {% endfor %}
+
+{% endif %}
+
+</body>
+</html>
