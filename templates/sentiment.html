@@ -1,37 +1,482 @@
+<!--<!DOCTYPE html>-->
+<!--<html lang="en">-->
+<!--<head>-->
+<!--    <meta charset="UTF-8">-->
+<!--    <title>Sentiment Analysis</title>-->
+<!--</head>-->
+<!--<body>-->
+<!--<h1>NLP WEB APP</h1>-->
+<!--<h2>Sentiment Analysis</h2>-->
+<!--<h3>{{message}}</h3>-->
+<!--<form action="/perform_sentiment" method="POST">-->
+
+<!--    <label>Perform Sentiment Analysis Text</label><br>-->
+
+<!--    <textarea name="text" rows="10" cols="50"></textarea><br><br>-->
+
+<!--    <input type="submit" value="Analyze Sentiment">-->
+<!--</form>-->
+<!--<hr>-->
+
+<!--{% if sentiment %}-->
+
+<!--    <h2>Result</h2>-->
+
+<!--    <p>-->
+<!--        Sentiment :-->
+<!--        <b>{{ sentiment }}</b>-->
+<!--    </p>-->
+
+<!--    <p>-->
+<!--        Confidence Score :-->
+<!--        <b>{{ score }}</b>-->
+<!--    </p>-->
+
+<!--{% endif %}-->
+<!--</body>-->
+<!--</html>-->
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Sentiment Analysis</title>
+    <title>Sentiment Analysis — NLP Web App</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --ink: #0d0d0d;
+            --paper: #f5f0e8;
+            --accent: #c8401a;
+            --accent-light: #f0ebe0;
+            --muted: #8a8070;
+            --border: #d8d0c0;
+            --shadow: rgba(13,13,13,0.12);
+        }
+
+        body {
+            min-height: 100vh;
+            background-color: var(--paper);
+            background-image:
+                radial-gradient(ellipse at 70% 20%, rgba(200,64,26,0.06) 0%, transparent 55%),
+                radial-gradient(ellipse at 20% 85%, rgba(200,64,26,0.04) 0%, transparent 50%),
+                url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60'%3E%3Ccircle cx='30' cy='30' r='0.8' fill='%23c8401a' opacity='0.12'/%3E%3C/svg%3E");
+            font-family: 'DM Sans', sans-serif;
+            display: grid;
+            place-items: start center;
+            padding: 2rem;
+        }
+
+        .blob {
+            position: fixed;
+            width: 500px; height: 500px;
+            border-radius: 50%;
+            filter: blur(90px);
+            opacity: 0.14;
+            pointer-events: none;
+            animation: drift 13s ease-in-out infinite alternate;
+        }
+        .blob-1 { background: #c8401a; top: -80px; right: -80px; }
+        .blob-2 { background: #e8a44a; bottom: -80px; left: -80px; animation-delay: -6s; }
+
+        @keyframes drift {
+            from { transform: translate(0,0) scale(1); }
+            to   { transform: translate(35px, 28px) scale(1.05); }
+        }
+
+        .page {
+            width: 100%;
+            max-width: 640px;
+            animation: rise 0.7s cubic-bezier(0.22,1,0.36,1) both;
+        }
+
+        @keyframes rise {
+            from { opacity: 0; transform: translateY(28px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Top nav */
+        .topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2.6rem;
+        }
+        .brand {
+            font-family: 'DM Serif Display', serif;
+            font-size: 0.72rem;
+            letter-spacing: 0.22em;
+            text-transform: uppercase;
+            color: var(--accent);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .brand::before {
+            content: '';
+            display: inline-block;
+            width: 18px; height: 2px;
+            background: var(--accent);
+            border-radius: 2px;
+        }
+        .back-btn {
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.78rem;
+            font-weight: 500;
+            color: var(--muted);
+            text-decoration: none;
+            letter-spacing: 0.04em;
+            padding: 0.4rem 0.9rem;
+            border: 1.5px solid var(--border);
+            border-radius: 20px;
+            transition: color 0.2s, border-color 0.2s;
+        }
+        .back-btn:hover { color: var(--accent); border-color: var(--accent); }
+
+        /* Header */
+        .header { margin-bottom: 2rem; }
+        .header .eyebrow {
+            font-size: 0.68rem;
+            font-weight: 500;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--accent);
+            margin-bottom: 0.4rem;
+        }
+        .header h1 {
+            font-family: 'DM Serif Display', serif;
+            font-size: 2.3rem;
+            line-height: 1.1;
+            color: var(--ink);
+            margin-bottom: 0.4rem;
+        }
+        .header h1 em { font-style: italic; color: var(--accent); }
+        .header p {
+            font-size: 0.88rem;
+            color: var(--muted);
+            font-weight: 300;
+        }
+
+        /* Message */
+        .message {
+            background: #fdf0ee;
+            border: 1px solid #f0b8ae;
+            color: #9e2d14;
+            font-size: 0.84rem;
+            padding: 0.6rem 0.9rem;
+            border-radius: 10px;
+            margin-bottom: 1.4rem;
+            display: none;
+        }
+        .message:not(:empty) { display: block; }
+
+        /* Card */
+        .card {
+            position: relative;
+            background: rgba(255,252,245,0.88);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 2.2rem 2.4rem;
+            box-shadow: 0 2px 0 rgba(255,255,255,0.9) inset, 0 20px 56px var(--shadow);
+            margin-bottom: 1.4rem;
+        }
+        .card::before {
+            content: '';
+            position: absolute;
+            top: -1px; left: 50%; transform: translateX(-50%);
+            width: 56px; height: 4px;
+            background: var(--accent);
+            border-radius: 0 0 4px 4px;
+        }
+
+        label.field-label {
+            display: block;
+            font-size: 0.78rem;
+            font-weight: 500;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            color: var(--ink);
+            margin-bottom: 0.65rem;
+        }
+
+        textarea {
+            width: 100%;
+            padding: 1rem 1.1rem;
+            background: var(--accent-light);
+            border: 1.5px solid transparent;
+            border-radius: 14px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.93rem;
+            color: var(--ink);
+            resize: vertical;
+            outline: none;
+            line-height: 1.65;
+            transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+            min-height: 150px;
+        }
+        textarea::placeholder { color: #b0a898; }
+        textarea:focus {
+            border-color: var(--accent);
+            background: #fff;
+            box-shadow: 0 0 0 3px rgba(200,64,26,0.1);
+        }
+
+        .char-count {
+            text-align: right;
+            font-size: 0.72rem;
+            color: var(--border);
+            margin-top: 0.4rem;
+            transition: color 0.2s;
+        }
+
+        button[type="submit"] {
+            width: 100%;
+            margin-top: 1.2rem;
+            padding: 0.9rem 1.5rem;
+            background: var(--accent);
+            color: #fff;
+            border: none;
+            border-radius: 12px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.95rem;
+            font-weight: 500;
+            letter-spacing: 0.04em;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.15s, box-shadow 0.2s;
+            box-shadow: 0 4px 18px rgba(200,64,26,0.38);
+        }
+        button[type="submit"]::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to bottom, rgba(255,255,255,0.12), transparent);
+        }
+        button[type="submit"]:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 28px rgba(200,64,26,0.45);
+        }
+        button[type="submit"]:active { transform: translateY(0); }
+
+        /* ── Results ── */
+        .results-card {
+            background: rgba(255,252,245,0.88);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 2rem 2.4rem 2.2rem;
+            box-shadow: 0 2px 0 rgba(255,255,255,0.9) inset, 0 16px 40px var(--shadow);
+            animation: rise 0.5s cubic-bezier(0.22,1,0.36,1) both;
+            margin-bottom: 1.4rem;
+        }
+
+        .results-header {
+            display: flex;
+            align-items: baseline;
+            justify-content: space-between;
+            margin-bottom: 1.6rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+        .results-header h2 {
+            font-family: 'DM Serif Display', serif;
+            font-size: 1.4rem;
+            color: var(--ink);
+        }
+        .results-header h2 em { font-style: italic; color: var(--accent); }
+
+        /* Big sentiment display */
+        .sentiment-display {
+            display: flex;
+            align-items: center;
+            gap: 1.2rem;
+            margin-bottom: 1.8rem;
+        }
+
+        .sentiment-emoji {
+            width: 64px; height: 64px;
+            border-radius: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            flex-shrink: 0;
+        }
+        .sentiment-emoji.positive { background: #e6f4ea; }
+        .sentiment-emoji.negative { background: #fdecea; }
+        .sentiment-emoji.neutral  { background: #f0ebe0; }
+
+        .sentiment-info {}
+        .sentiment-label-text {
+            font-size: 0.7rem;
+            font-weight: 500;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--muted);
+            margin-bottom: 0.2rem;
+        }
+        .sentiment-value {
+            font-family: 'DM Serif Display', serif;
+            font-size: 2rem;
+            line-height: 1.1;
+        }
+        .sentiment-value.positive { color: #2a7a36; }
+        .sentiment-value.negative { color: #c8401a; }
+        .sentiment-value.neutral  { color: #6a6050; }
+
+        /* Score bar */
+        .score-section {}
+        .score-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            margin-bottom: 0.5rem;
+        }
+        .score-label {
+            font-size: 0.78rem;
+            font-weight: 500;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            color: var(--ink);
+        }
+        .score-value {
+            font-family: 'DM Serif Display', serif;
+            font-size: 1.5rem;
+            color: var(--ink);
+        }
+
+        .score-bar-track {
+            width: 100%;
+            height: 10px;
+            background: var(--accent-light);
+            border-radius: 99px;
+            overflow: hidden;
+        }
+        .score-bar-fill {
+            height: 100%;
+            border-radius: 99px;
+            transition: width 1s cubic-bezier(0.22,1,0.36,1);
+        }
+        .score-bar-fill.positive { background: linear-gradient(90deg, #4caf6e, #2a7a36); }
+        .score-bar-fill.negative { background: linear-gradient(90deg, #e8775a, #c8401a); }
+        .score-bar-fill.neutral  { background: linear-gradient(90deg, #c0b090, #8a8070); }
+
+        .score-sublabel {
+            font-size: 0.72rem;
+            color: var(--muted);
+            margin-top: 0.4rem;
+        }
+
+        .footer {
+            text-align: center;
+            font-size: 0.78rem;
+            color: var(--border);
+            margin-top: 1rem;
+            letter-spacing: 0.04em;
+        }
+    </style>
 </head>
 <body>
-<h1>NLP WEB APP</h1>
-<h2>Sentiment Analysis</h2>
-<h3>{{message}}</h3>
-<form action="/perform_sentiment" method="POST">
 
-    <label>Perform Sentiment Analysis Text</label><br>
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
 
-    <textarea name="text" rows="10" cols="50"></textarea><br><br>
+    <div class="page">
 
-    <input type="submit" value="Analyze Sentiment">
-</form>
-<hr>
+        <div class="topbar">
+            <div class="brand">NLP Web App</div>
+            <a href="/profile" class="back-btn">← Dashboard</a>
+        </div>
 
-{% if sentiment %}
+        <div class="header">
+            <div class="eyebrow">Analysis</div>
+            <h1>Sentiment<br><em>Analysis</em></h1>
+            <p>Detect the emotional tone of any text</p>
+        </div>
 
-    <h2>Result</h2>
+        <div class="message">{{ message }}</div>
 
-    <p>
-        Sentiment :
-        <b>{{ sentiment }}</b>
-    </p>
+        <div class="card">
+            <form action="/perform_sentiment" method="POST">
+                <label class="field-label" for="sentiment-text">Enter your text</label>
+                <textarea id="sentiment-text" name="text" rows="6"
+                    placeholder="Paste a review, tweet, paragraph, or any text to analyse its sentiment…"></textarea>
+                <div class="char-count" id="char-count">0 characters</div>
+                <button type="submit">Analyse Sentiment →</button>
+            </form>
+        </div>
 
-    <p>
-        Confidence Score :
-        <b>{{ score }}</b>
-    </p>
+        {% if sentiment %}
+        <div class="results-card">
+            <div class="results-header">
+                <h2>Analysis <em>Result</em></h2>
+            </div>
 
-{% endif %}
+            {% set tone = sentiment | lower %}
+
+            <div class="sentiment-display">
+                <div class="sentiment-emoji {{ tone }}">
+                    {% if tone == 'positive' %}😊
+                    {% elif tone == 'negative' %}😟
+                    {% else %}😐{% endif %}
+                </div>
+                <div class="sentiment-info">
+                    <div class="sentiment-label-text">Detected Sentiment</div>
+                    <div class="sentiment-value {{ tone }}">{{ sentiment }}</div>
+                </div>
+            </div>
+
+            <div class="score-section">
+                <div class="score-top">
+                    <span class="score-label">Confidence Score</span>
+                    <span class="score-value">{{ score }}</span>
+                </div>
+                <div class="score-bar-track">
+                    <div class="score-bar-fill {{ tone }}"
+                         id="score-fill"
+                         style="width: 0%"
+                         data-score="{{ score }}">
+                    </div>
+                </div>
+                <div class="score-sublabel">How confident the model is in this prediction</div>
+            </div>
+        </div>
+        {% endif %}
+
+        <div class="footer">NLP Web App &nbsp;·&nbsp; Language Intelligence</div>
+
+    </div>
+
+    <script>
+        /* Character counter */
+        const ta = document.getElementById('sentiment-text');
+        const cc = document.getElementById('char-count');
+        if (ta) {
+            ta.addEventListener('input', () => {
+                const n = ta.value.length;
+                cc.textContent = n.toLocaleString() + ' character' + (n !== 1 ? 's' : '');
+                cc.style.color = n > 4000 ? 'var(--accent)' : 'var(--border)';
+            });
+        }
+
+        /* Animate score bar on load */
+        const fill = document.getElementById('score-fill');
+        if (fill) {
+            const raw = fill.dataset.score || '0';
+            /* accept "0.87", "87", "87%" */
+            let pct = parseFloat(raw.replace('%', ''));
+            if (pct <= 1) pct = pct * 100;
+            pct = Math.min(100, Math.max(0, pct));
+            requestAnimationFrame(() => {
+                setTimeout(() => { fill.style.width = pct + '%'; }, 80);
+            });
+        }
+    </script>
+
 </body>
 </html>

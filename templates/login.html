@@ -1,28 +1,311 @@
+<!--<!DOCTYPE html>-->
+<!--<html lang="en">-->
+<!--<head>-->
+<!--    <meta charset="UTF-8">-->
+<!--    <title> Login </title>-->
+<!--    <style>-->
+<!--        body{background-color:lightblue }</style>-->
+<!--</head>-->
+<!--<body>-->
+<!--<h1>NLP WEB APP</h1>-->
+<!--<h3>login </h3>-->
+<!--<h3 style="color:Green">{{ message }}</h3>-->
+
+<!--<form action="/perform_login" method="POST">-->
+<!--    <label>Email</label><br>-->
+<!--    <input type="email"  name="email"><br>-->
+<!--    <label>Password</label><br>-->
+<!--    <input type="password" name="password"><br><br>-->
+
+<!--    <input type="submit" value="Login">-->
+
+
+
+<!--</form>-->
+
+<!--<p> Not a member? <a href="/register">Register Here</a></p>-->
+<!--</body>-->
+<!--</html>-->
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title> Login </title>
+    <title>Login — NLP Web App</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
     <style>
-        body{background-color:lightblue }</style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --ink: #0d0d0d;
+            --paper: #f5f0e8;
+            --accent: #c8401a;
+            --accent-light: #f0ebe0;
+            --muted: #8a8070;
+            --border: #d8d0c0;
+            --shadow: rgba(13,13,13,0.12);
+        }
+
+        body {
+            min-height: 100vh;
+            background-color: var(--paper);
+            background-image:
+                radial-gradient(ellipse at 20% 50%, rgba(200,64,26,0.06) 0%, transparent 60%),
+                radial-gradient(ellipse at 80% 10%, rgba(200,64,26,0.04) 0%, transparent 50%),
+                url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60'%3E%3Ccircle cx='30' cy='30' r='0.8' fill='%23c8401a' opacity='0.12'/%3E%3C/svg%3E");
+            font-family: 'DM Sans', sans-serif;
+            display: grid;
+            place-items: center;
+            padding: 2rem;
+        }
+
+        /* Floating label blob */
+        .blob {
+            position: fixed;
+            width: 520px;
+            height: 520px;
+            border-radius: 50%;
+            filter: blur(90px);
+            opacity: 0.18;
+            pointer-events: none;
+            animation: drift 12s ease-in-out infinite alternate;
+        }
+        .blob-1 { background: #c8401a; top: -120px; left: -100px; }
+        .blob-2 { background: #e8a44a; bottom: -120px; right: -80px; animation-delay: -6s; }
+
+        @keyframes drift {
+            from { transform: translate(0, 0) scale(1); }
+            to   { transform: translate(40px, 30px) scale(1.05); }
+        }
+
+        .card {
+            position: relative;
+            background: rgba(255,252,245,0.85);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 3rem 3.2rem 2.8rem;
+            width: 100%;
+            max-width: 420px;
+            box-shadow:
+                0 2px 0 rgba(255,255,255,0.9) inset,
+                0 24px 60px var(--shadow),
+                0 4px 16px rgba(200,64,26,0.06);
+            animation: rise 0.7s cubic-bezier(0.22,1,0.36,1) both;
+        }
+
+        @keyframes rise {
+            from { opacity: 0; transform: translateY(28px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Decorative corner mark */
+        .card::before {
+            content: '';
+            position: absolute;
+            top: -1px; right: 32px;
+            width: 48px; height: 4px;
+            background: var(--accent);
+            border-radius: 0 0 4px 4px;
+        }
+
+        .brand {
+            font-family: 'DM Serif Display', serif;
+            font-size: 0.72rem;
+            letter-spacing: 0.22em;
+            text-transform: uppercase;
+            color: var(--accent);
+            margin-bottom: 1.6rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .brand::before {
+            content: '';
+            display: inline-block;
+            width: 18px; height: 2px;
+            background: var(--accent);
+            border-radius: 2px;
+        }
+
+        h1 {
+            font-family: 'DM Serif Display', serif;
+            font-size: 2.3rem;
+            line-height: 1.1;
+            color: var(--ink);
+            margin-bottom: 0.4rem;
+        }
+        h1 em {
+            font-style: italic;
+            color: var(--accent);
+        }
+
+        .subtitle {
+            font-size: 0.88rem;
+            color: var(--muted);
+            font-weight: 300;
+            margin-bottom: 2.2rem;
+            letter-spacing: 0.01em;
+        }
+
+        .message {
+            background: #edf7ed;
+            border: 1px solid #a8d5aa;
+            color: #2d6a30;
+            font-size: 0.84rem;
+            padding: 0.6rem 0.9rem;
+            border-radius: 10px;
+            margin-bottom: 1.4rem;
+            display: none;
+        }
+        .message:not(:empty) { display: block; }
+
+        .field {
+            margin-bottom: 1.3rem;
+        }
+
+        label {
+            display: block;
+            font-size: 0.78rem;
+            font-weight: 500;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            color: var(--ink);
+            margin-bottom: 0.55rem;
+        }
+
+        input[type="email"],
+        input[type="password"] {
+            width: 100%;
+            padding: 0.8rem 1rem;
+            background: var(--accent-light);
+            border: 1.5px solid transparent;
+            border-radius: 12px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.95rem;
+            color: var(--ink);
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+        }
+        input[type="email"]::placeholder,
+        input[type="password"]::placeholder { color: #b0a898; }
+
+        input[type="email"]:focus,
+        input[type="password"]:focus {
+            border-color: var(--accent);
+            background: #fff;
+            box-shadow: 0 0 0 3px rgba(200,64,26,0.1);
+        }
+
+        .forgot {
+            text-align: right;
+            margin-top: -0.6rem;
+            margin-bottom: 1.6rem;
+        }
+        .forgot a {
+            font-size: 0.78rem;
+            color: var(--muted);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+        .forgot a:hover { color: var(--accent); }
+
+        button[type="submit"] {
+            width: 100%;
+            padding: 0.9rem 1.5rem;
+            background: var(--accent);
+            color: #fff;
+            border: none;
+            border-radius: 12px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.95rem;
+            font-weight: 500;
+            letter-spacing: 0.04em;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.15s, box-shadow 0.2s;
+            box-shadow: 0 4px 18px rgba(200,64,26,0.38);
+        }
+        button[type="submit"]::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to bottom, rgba(255,255,255,0.12), transparent);
+        }
+        button[type="submit"]:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 28px rgba(200,64,26,0.45);
+        }
+        button[type="submit"]:active {
+            transform: translateY(0);
+        }
+
+        .divider {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin: 1.6rem 0;
+            color: var(--border);
+            font-size: 0.75rem;
+            letter-spacing: 0.08em;
+            color: var(--muted);
+        }
+        .divider::before, .divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: var(--border);
+        }
+
+        .register-link {
+            text-align: center;
+            font-size: 0.86rem;
+            color: var(--muted);
+        }
+        .register-link a {
+            color: var(--ink);
+            font-weight: 500;
+            text-decoration: none;
+            border-bottom: 1.5px solid var(--accent);
+            padding-bottom: 1px;
+            transition: color 0.2s;
+        }
+        .register-link a:hover { color: var(--accent); }
+    </style>
 </head>
 <body>
-<h1>NLP WEB APP</h1>
-<h3>login </h3>
-<h3 style="color:Green">{{ message }}</h3>
 
-<form action="/perform_login" method="POST">
-    <label>Email</label><br>
-    <input type="email"  name="email"><br>
-    <label>Password</label><br>
-    <input type="password" name="password"><br><br>
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
 
-    <input type="submit" value="Login">
+    <div class="card">
+        <div class="brand">NLP Web App</div>
+        <h1>Welcome<br><em>back.</em></h1>
+        <p class="subtitle">Sign in to continue to your workspace</p>
 
+        <div class="message">{{ message }}</div>
 
+        <form action="/perform_login" method="POST">
+            <div class="field">
+                <label for="email">Email</label>
+                <input type="email" id="email" name="email" placeholder="you@example.com" required>
+            </div>
 
-</form>
+            <div class="field">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" placeholder="••••••••" required>
+            </div>
 
-<p> Not a member? <a href="/register">Register Here</a></p>
+            <div class="forgot"><a href="#">Forgot password?</a></div>
+
+            <button type="submit">Sign In →</button>
+        </form>
+
+        <div class="divider">or</div>
+        <p class="register-link">Not a member? <a href="/register">Create an account</a></p>
+    </div>
+
 </body>
 </html>

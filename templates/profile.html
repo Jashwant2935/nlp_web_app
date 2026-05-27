@@ -1,16 +1,313 @@
+<!--<!DOCTYPE html>-->
+<!--<html lang="en">-->
+<!--<head>-->
+<!--    <meta charset="UTF-8">-->
+<!--    <title>Profile</title>-->
+<!--</head>-->
+<!--<body>-->
+<!--<h1>Profile</h1>-->
+<!--<p> Which Would you like to do  </p>-->
+<!--<ul>-->
+<!--    <li> <a href="/ner"> NER</a></li>-->
+<!--    <li><a href="/sentiment"> Sentiment Analysis </a></li>-->
+<!--    <li>Abuse detection</li>-->
+<!--</ul>-->
+<!--</body>-->
+<!--</html>-->
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Profile</title>
+    <title>Dashboard — NLP Web App</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --ink: #0d0d0d;
+            --paper: #f5f0e8;
+            --accent: #c8401a;
+            --accent-light: #f0ebe0;
+            --muted: #8a8070;
+            --border: #d8d0c0;
+            --shadow: rgba(13,13,13,0.12);
+        }
+
+        body {
+            min-height: 100vh;
+            background-color: var(--paper);
+            background-image:
+                radial-gradient(ellipse at 50% 0%, rgba(200,64,26,0.07) 0%, transparent 55%),
+                radial-gradient(ellipse at 90% 90%, rgba(200,64,26,0.04) 0%, transparent 50%),
+                url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60'%3E%3Ccircle cx='30' cy='30' r='0.8' fill='%23c8401a' opacity='0.12'/%3E%3C/svg%3E");
+            font-family: 'DM Sans', sans-serif;
+            display: grid;
+            place-items: center;
+            padding: 2rem;
+        }
+
+        .blob {
+            position: fixed;
+            width: 500px; height: 500px;
+            border-radius: 50%;
+            filter: blur(90px);
+            opacity: 0.15;
+            pointer-events: none;
+            animation: drift 14s ease-in-out infinite alternate;
+        }
+        .blob-1 { background: #c8401a; top: -100px; left: 50%; transform: translateX(-50%); }
+        .blob-2 { background: #e8a44a; bottom: -100px; right: -80px; animation-delay: -7s; }
+
+        @keyframes drift {
+            from { transform: translate(0,0) scale(1); }
+            to   { transform: translate(30px, 25px) scale(1.06); }
+        }
+
+        .page {
+            width: 100%;
+            max-width: 560px;
+            animation: rise 0.7s cubic-bezier(0.22,1,0.36,1) both;
+        }
+
+        @keyframes rise {
+            from { opacity: 0; transform: translateY(28px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Top nav bar */
+        .topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2.6rem;
+        }
+
+        .brand {
+            font-family: 'DM Serif Display', serif;
+            font-size: 0.72rem;
+            letter-spacing: 0.22em;
+            text-transform: uppercase;
+            color: var(--accent);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .brand::before {
+            content: '';
+            display: inline-block;
+            width: 18px; height: 2px;
+            background: var(--accent);
+            border-radius: 2px;
+        }
+
+        .logout-btn {
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.78rem;
+            font-weight: 500;
+            color: var(--muted);
+            text-decoration: none;
+            letter-spacing: 0.04em;
+            padding: 0.4rem 0.9rem;
+            border: 1.5px solid var(--border);
+            border-radius: 20px;
+            transition: color 0.2s, border-color 0.2s;
+        }
+        .logout-btn:hover { color: var(--accent); border-color: var(--accent); }
+
+        /* Header */
+        .header {
+            margin-bottom: 2.4rem;
+        }
+        .header h1 {
+            font-family: 'DM Serif Display', serif;
+            font-size: 2.5rem;
+            line-height: 1.1;
+            color: var(--ink);
+            margin-bottom: 0.4rem;
+        }
+        .header h1 em {
+            font-style: italic;
+            color: var(--accent);
+        }
+        .header p {
+            font-size: 0.9rem;
+            color: var(--muted);
+            font-weight: 300;
+        }
+
+        /* Tool cards grid */
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .tool-card {
+            position: relative;
+            background: rgba(255,252,245,0.85);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1.5px solid var(--border);
+            border-radius: 20px;
+            padding: 1.6rem 1.5rem 1.4rem;
+            text-decoration: none;
+            cursor: pointer;
+            overflow: hidden;
+            transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+            box-shadow: 0 4px 20px var(--shadow);
+            animation: rise 0.7s cubic-bezier(0.22,1,0.36,1) both;
+        }
+        .tool-card:nth-child(1) { animation-delay: 0.05s; }
+        .tool-card:nth-child(2) { animation-delay: 0.12s; }
+        .tool-card:nth-child(3) { animation-delay: 0.19s; grid-column: 1 / -1; }
+
+        .tool-card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(200,64,26,0.05) 0%, transparent 60%);
+            opacity: 0;
+            transition: opacity 0.25s;
+        }
+        .tool-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 36px rgba(13,13,13,0.14);
+            border-color: rgba(200,64,26,0.35);
+        }
+        .tool-card:hover::before { opacity: 1; }
+
+        /* disabled state */
+        .tool-card.disabled {
+            cursor: default;
+            opacity: 0.6;
+            pointer-events: none;
+        }
+
+        .tool-icon {
+            width: 38px; height: 38px;
+            border-radius: 10px;
+            background: var(--accent-light);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1.1rem;
+            font-size: 1.1rem;
+            transition: background 0.2s;
+        }
+        .tool-card:hover .tool-icon {
+            background: rgba(200,64,26,0.14);
+        }
+
+        .tool-label {
+            font-size: 0.68rem;
+            font-weight: 500;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--accent);
+            margin-bottom: 0.35rem;
+        }
+
+        .tool-name {
+            font-family: 'DM Serif Display', serif;
+            font-size: 1.25rem;
+            color: var(--ink);
+            margin-bottom: 0.5rem;
+            line-height: 1.2;
+        }
+
+        .tool-desc {
+            font-size: 0.8rem;
+            color: var(--muted);
+            line-height: 1.55;
+            font-weight: 300;
+        }
+
+        .tool-arrow {
+            position: absolute;
+            bottom: 1.3rem; right: 1.4rem;
+            font-size: 1rem;
+            color: var(--border);
+            transition: color 0.2s, transform 0.2s;
+        }
+        .tool-card:hover .tool-arrow {
+            color: var(--accent);
+            transform: translate(3px, -3px);
+        }
+
+        .coming-soon {
+            display: inline-block;
+            font-size: 0.65rem;
+            letter-spacing: 0.08em;
+            font-weight: 500;
+            text-transform: uppercase;
+            color: var(--muted);
+            background: var(--accent-light);
+            border-radius: 20px;
+            padding: 0.2rem 0.55rem;
+            margin-top: 0.5rem;
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            font-size: 0.78rem;
+            color: var(--border);
+            margin-top: 2rem;
+            letter-spacing: 0.04em;
+        }
+    </style>
 </head>
 <body>
-<h1>Profile</h1>
-<p> Which Would you like to do  </p>
-<ul>
-    <li> <a href="/ner"> NER</a></li>
-    <li><a href="/sentiment"> Sentiment Analysis </a></li>
-    <li>Abuse detection</li>
-</ul>
+
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+
+    <div class="page">
+
+        <div class="topbar">
+            <div class="brand">NLP Web App</div>
+            <a href="/" class="logout-btn">Sign out</a>
+        </div>
+
+        <div class="header">
+            <h1>What would you<br>like to <em>analyse?</em></h1>
+            <p>Pick a tool below to get started</p>
+        </div>
+
+        <div class="grid">
+
+            <a href="/ner" class="tool-card">
+                <div class="tool-icon">🏷️</div>
+                <div class="tool-label">Extraction</div>
+                <div class="tool-name">Named Entity Recognition</div>
+                <div class="tool-desc">Identify people, places, organisations and more in your text.</div>
+                <span class="tool-arrow">↗</span>
+            </a>
+
+            <a href="/sentiment" class="tool-card">
+                <div class="tool-icon">💬</div>
+                <div class="tool-label">Analysis</div>
+                <div class="tool-name">Sentiment Analysis</div>
+                <div class="tool-desc">Detect the emotional tone — positive, negative, or neutral.</div>
+                <span class="tool-arrow">↗</span>
+            </a>
+
+            <div class="tool-card disabled">
+                <div class="tool-icon">🚫</div>
+                <div class="tool-label">Moderation</div>
+                <div class="tool-name">Abuse Detection</div>
+                <div class="tool-desc">Flag harmful, offensive, or abusive language automatically.</div>
+                <span class="coming-soon">Coming soon</span>
+            </div>
+
+        </div>
+
+        <div class="footer">NLP Web App &nbsp;·&nbsp; Language Intelligence</div>
+
+    </div>
+
 </body>
 </html>
