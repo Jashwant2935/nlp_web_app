@@ -174,4 +174,5 @@ def perform_sentiment():
         'sentiment.html',sentiment=sentiment,score=score)
 
 
-app.run(debug=True)
+if __name__ == "__main__":
+    app.run(debug=True)
