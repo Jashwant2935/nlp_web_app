@@ -16,10 +16,10 @@ app=Flask(__name__)
 # )
 
 
-sentiment_pipeline = pipeline(
-    "sentiment-analysis",
-    model="distilbert-base-uncased-finetuned-sst-2-english"
-)
+# sentiment_pipeline = pipeline(
+#     "sentiment-analysis",
+#     model="distilbert-base-uncased-finetuned-sst-2-english"
+# )
 
 conn=sqlite3.connect("users.db")
 connection=conn.cursor()
