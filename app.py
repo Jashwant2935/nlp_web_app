@@ -2,7 +2,8 @@
 
 from flask import Flask,render_template,request,redirect
 import sqlite3
-from transformers import pipeline
+import requests
+# from transformers import pipeline
 
 
 app=Flask(__name__)
@@ -163,15 +164,33 @@ def sentiment():
     return render_template('sentiment.html')
 @app.route('/perform_sentiment', methods=['POST'])
 def perform_sentiment():
-    text=request.form['text']
-    if text == "":
-        return render_template('sentiment.html', message="Please enter some text")
-    result=sentiment_pipeline(text)
-    sentiment=result[0]['label']
-    score=round(result[0]['score'],2)
-    return render_template(
-        'sentiment.html',sentiment=sentiment,score=score)
 
+    text = request.form['text']
+
+    if text == "":
+        return render_template(
+            'sentiment.html',
+            message="Please enter some text"
+        )
+
+    API_URL = "https://api-inference.huggingface.co/models/distilbert/distilbert-base-uncased-finetuned-sst-2-english"
+
+    payload = {
+        "inputs": text
+    }
+
+    response = requests.post(API_URL, json=payload)
+
+    result = response.json()
+
+    sentiment = result[0][0]['label']
+    score = round(result[0][0]['score'], 2)
+
+    return render_template(
+        'sentiment.html',
+        sentiment=sentiment,
+        score=score
+    )
 
 if __name__ == "__main__":
     app.run(debug=True)
