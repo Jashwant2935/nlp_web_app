@@ -1,21 +1,24 @@
-from http import HTTPStatus
+
 
 from flask import Flask,render_template,request,redirect
 import sqlite3
 from transformers import pipeline
-from urllib3.util import response
+
 
 app=Flask(__name__)
 
 # Load spaCy model
-ner_pipeline = pipeline(
-    "ner",
-    model="dslim/bert-base-NER",
-    aggregation_strategy="simple"
+# ner_pipeline = pipeline(
+#     "ner",
+#     model="dslim/bert-base-NER",
+#     aggregation_strategy="simple"
+# )
+
+
+sentiment_pipeline = pipeline(
+    "sentiment-analysis",
+    model="distilbert-base-uncased-finetuned-sst-2-english"
 )
-
-
-sentiment_pipeline = pipeline("sentiment-analysis")
 
 conn=sqlite3.connect("users.db")
 connection=conn.cursor()
@@ -123,16 +126,12 @@ def ner():
 
 @app.route('/perform_ner', methods=['POST'])
 def perform_ner():
-
-    text = request.form['text']
-
-    if text == "":
-        return render_template(
-            'ner.html',
-            message="Please enter some text"
+    return render_template(
+        'ner.html',
+        message="NER feature temporarily disabled"
         )
 
-    result = ner_pipeline(text)
+    # result = ner_pipeline(text)
 
     # Better labels
     label_map = {
